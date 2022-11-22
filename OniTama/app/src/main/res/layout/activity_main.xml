@@ -123,6 +123,7 @@
                 android:layout_margin="2dp"
                 android:layout_weight="1"
                 android:background="@color/white"
+                android:onClick="kotakClick"
                 app:srcCompat="@drawable/red_pawn" />
 
             <ImageButton
@@ -132,6 +133,7 @@
                 android:layout_margin="2dp"
                 android:layout_weight="1"
                 android:background="@color/white"
+                android:onClick="kotakClick"
                 app:srcCompat="@drawable/red_pawn" />
 
             <ImageButton
@@ -141,6 +143,7 @@
                 android:layout_margin="2dp"
                 android:layout_weight="1"
                 android:background="@color/white"
+                android:onClick="kotakClick"
                 app:srcCompat="@drawable/red_pawn" />
 
             <ImageButton
@@ -150,6 +153,7 @@
                 android:layout_margin="2dp"
                 android:layout_weight="1"
                 android:background="@color/white"
+                android:onClick="kotakClick"
                 app:srcCompat="@drawable/red_pawn" />
 
             <ImageButton
@@ -159,6 +163,7 @@
                 android:layout_margin="2dp"
                 android:layout_weight="1"
                 android:background="@color/white"
+                android:onClick="kotakClick"
                 app:srcCompat="@drawable/red_pawn" />
         </LinearLayout>
 
@@ -174,6 +179,7 @@
                 android:layout_margin="2dp"
                 android:layout_weight="1"
                 android:background="@color/white"
+                android:onClick="kotakClick"
                 app:srcCompat="@drawable/blank_background" />
 
             <ImageButton
@@ -183,6 +189,7 @@
                 android:layout_margin="2dp"
                 android:layout_weight="1"
                 android:background="@color/white"
+                android:onClick="kotakClick"
                 app:srcCompat="@drawable/blank_background" />
 
             <ImageButton
@@ -192,6 +199,7 @@
                 android:layout_margin="2dp"
                 android:layout_weight="1"
                 android:background="@color/white"
+                android:onClick="kotakClick"
                 app:srcCompat="@drawable/blank_background" />
 
             <ImageButton
@@ -201,6 +209,7 @@
                 android:layout_margin="2dp"
                 android:layout_weight="1"
                 android:background="@color/white"
+                android:onClick="kotakClick"
                 app:srcCompat="@drawable/blank_background" />
 
             <ImageButton
@@ -210,6 +219,7 @@
                 android:layout_margin="2dp"
                 android:layout_weight="1"
                 android:background="@color/white"
+                android:onClick="kotakClick"
                 app:srcCompat="@drawable/blank_background" />
         </LinearLayout>
 
@@ -225,6 +235,7 @@
                 android:layout_margin="2dp"
                 android:layout_weight="1"
                 android:background="@color/white"
+                android:onClick="kotakClick"
                 app:srcCompat="@drawable/blank_background" />
 
             <ImageButton
@@ -234,6 +245,7 @@
                 android:layout_margin="2dp"
                 android:layout_weight="1"
                 android:background="@color/white"
+                android:onClick="kotakClick"
                 app:srcCompat="@drawable/blank_background" />
 
             <ImageButton
@@ -243,6 +255,7 @@
                 android:layout_margin="2dp"
                 android:layout_weight="1"
                 android:background="@color/white"
+                android:onClick="kotakClick"
                 app:srcCompat="@drawable/blank_background" />
 
             <ImageButton
@@ -252,6 +265,7 @@
                 android:layout_margin="2dp"
                 android:layout_weight="1"
                 android:background="@color/white"
+                android:onClick="kotakClick"
                 app:srcCompat="@drawable/blank_background" />
 
             <ImageButton
@@ -261,6 +275,7 @@
                 android:layout_margin="2dp"
                 android:layout_weight="1"
                 android:background="@color/white"
+                android:onClick="kotakClick"
                 app:srcCompat="@drawable/blank_background" />
         </LinearLayout>
 
@@ -276,6 +291,7 @@
                 android:layout_margin="2dp"
                 android:layout_weight="1"
                 android:background="@color/white"
+                android:onClick="kotakClick"
                 app:srcCompat="@drawable/blank_background" />
 
             <ImageButton
@@ -285,6 +301,7 @@
                 android:layout_margin="2dp"
                 android:layout_weight="1"
                 android:background="@color/white"
+                android:onClick="kotakClick"
                 app:srcCompat="@drawable/blank_background" />
 
             <ImageButton
@@ -294,6 +311,7 @@
                 android:layout_margin="2dp"
                 android:layout_weight="1"
                 android:background="@color/white"
+                android:onClick="kotakClick"
                 app:srcCompat="@drawable/blank_background" />
 
             <ImageButton
@@ -303,6 +321,7 @@
                 android:layout_margin="2dp"
                 android:layout_weight="1"
                 android:background="@color/white"
+                android:onClick="kotakClick"
                 app:srcCompat="@drawable/blank_background" />
 
             <ImageButton
@@ -312,6 +331,7 @@
                 android:layout_margin="2dp"
                 android:layout_weight="1"
                 android:background="@color/white"
+                android:onClick="kotakClick"
                 app:srcCompat="@drawable/blank_background" />
         </LinearLayout>
 
@@ -327,6 +347,7 @@
                 android:layout_margin="2dp"
                 android:layout_weight="1"
                 android:background="@color/white"
+                android:onClick="kotakClick"
                 app:srcCompat="@drawable/blue_pawn" />
 
             <ImageButton
@@ -336,6 +357,7 @@
                 android:layout_margin="2dp"
                 android:layout_weight="1"
                 android:background="@color/white"
+                android:onClick="kotakClick"
                 app:srcCompat="@drawable/blue_pawn" />
 
             <ImageButton
@@ -345,6 +367,7 @@
                 android:layout_margin="2dp"
                 android:layout_weight="1"
                 android:background="@color/white"
+                android:onClick="kotakClick"
                 app:srcCompat="@drawable/blue_pawn" />
 
             <ImageButton
@@ -354,6 +377,7 @@
                 android:layout_margin="2dp"
                 android:layout_weight="1"
                 android:background="@color/white"
+                android:onClick="kotakClick"
                 app:srcCompat="@drawable/blue_pawn" />
 
             <ImageButton
@@ -363,6 +387,7 @@
                 android:layout_margin="2dp"
                 android:layout_weight="1"
                 android:background="@color/white"
+                android:onClick="kotakClick"
                 app:srcCompat="@drawable/blue_pawn" />
         </LinearLayout>
     </LinearLayout>

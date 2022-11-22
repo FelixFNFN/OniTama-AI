@@ -9,7 +9,7 @@ class GameSetup {
     private var CRAB : Array<IntArray> = arrayOf(intArrayOf(0,1),intArrayOf(-2,0),intArrayOf(2,0))
     private var ELEPHANT : Array<IntArray> = arrayOf(intArrayOf(-1,1),intArrayOf(1,1),intArrayOf(-1,0),intArrayOf(1,0))
     private var GOOSE : Array<IntArray> = arrayOf(intArrayOf(-1,1),intArrayOf(-1,0),intArrayOf(1,0),intArrayOf(1,-1))
-    private var ROOSTER : Array<IntArray> = arrayOf(intArrayOf(1,1),intArrayOf(-1,0),intArrayOf(1,0),intArrayOf(-1,1))
+    private var ROOSTER : Array<IntArray> = arrayOf(intArrayOf(1,1),intArrayOf(-1,0),intArrayOf(1,0),intArrayOf(-1,-1))
     private var MONKEY : Array<IntArray> = arrayOf(intArrayOf(-1,1),intArrayOf(1,1),intArrayOf(-1,-1),intArrayOf(1,-1))
     private var MANTIS : Array<IntArray> = arrayOf(intArrayOf(-1,1),intArrayOf(1,1),intArrayOf(0,-1))
     private var HORSE : Array<IntArray> = arrayOf(intArrayOf(0,1),intArrayOf(-1,0),intArrayOf(0,-1))
