@@ -1,5 +1,6 @@
 package com.example.onitama
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -36,6 +37,8 @@ class MainActivity : AppCompatActivity() {
     private var turn = "P1"
     private var chosecard = ""
     private var pionpick = -1
+    private var jumpionP1 = 5
+    private var jumpionP2 = 5
 
 
 
@@ -88,25 +91,21 @@ class MainActivity : AppCompatActivity() {
         cardP1_1.setOnClickListener {
             if (turn=="P1") {
                 chosecard = cardP1_1.text.toString()
-                Toast.makeText(this, "$chosecard", Toast.LENGTH_SHORT).show()
             }
         }
         cardP1_2.setOnClickListener {
             if (turn=="P1") {
                 chosecard = cardP1_2.text.toString()
-                Toast.makeText(this, "$chosecard", Toast.LENGTH_SHORT).show()
             }
         }
         cardP2_1.setOnClickListener {
             if (turn=="P2") {
                 chosecard = cardP2_1.text.toString()
-                Toast.makeText(this, "$chosecard", Toast.LENGTH_SHORT).show()
             }
         }
         cardP2_2.setOnClickListener {
             if (turn=="P2") {
                 chosecard = cardP2_2.text.toString()
-                Toast.makeText(this, "$chosecard", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -185,14 +184,22 @@ class MainActivity : AppCompatActivity() {
                     //karena papan menggunakan arraylist dan card yang dibuat dalam bentuk array maka rumus yang digunakan yaitu
                     //idxlangkah yang x ditambah dengan posisi pion yang diklik
                     //idxlangkah yang y * 5 dan dikurangi posisi pion yang diklik, dalam kasus ini p1 arah jalannya ke atas maka harus dikurangi
+
+//                    Log.i("nilaibandingpos1", Math.ceil((posvalid/5).toDouble()).toString())
+                    var banding1 = Math.ceil((posvalid/5).toDouble())//nilai pembulatan ke atas dari posisi valid sebelum ditambah kordinat langkah valid
                     posvalid+=(idxlangkah[i][0])//untuk menghitung kordinat x
+//                    Log.i("nilaibandingpos2", Math.ceil((posvalid/5).toDouble()).toString())
+                    var banding2 = Math.ceil((posvalid/5).toDouble())//nilai pembulatan ke atas dari posisi valid sesudah ditambah kordinat x langkah valid
                     posvalid-=(5*idxlangkah[i][1])// untuk menghitung kordinat y
 //                    Log.i("kor x", Arrays.deepToString(arrayOf(idxlangkah[i][0])) )
 //                    Log.i("kor y", Arrays.deepToString(arrayOf(idxlangkah[i][1])) )
+
                     try {
-                        if (papan[posvalid].getTag()!="armyP1"&&papan[posvalid].getTag()!="kingP1") {// melakukan pengecekan apakah langkah yang divalidasi merupakan tempat pin kelompok P1
+                        if (papan[posvalid].getTag()!="armyP1"&&papan[posvalid].getTag()!="kingP1"&&banding1==banding2) {// melakukan pengecekan apakah langkah yang divalidasi merupakan tempat pin kelompok P1
                             papan[posvalid].setBackgroundColor(resources.getColor(R.color.valid_papan))
-                            papan[posvalid].setTag("valid")
+                            if (papan[posvalid].getTag()!="armyP2"&&papan[posvalid].getTag()!="kingP2") {
+                                papan[posvalid].setTag("valid")
+                            }
                         }
                     }
                     catch (e: Exception){
@@ -201,7 +208,13 @@ class MainActivity : AppCompatActivity() {
                 }
 
             }
-            else if (papan[ctridx].getTag().toString()=="valid"){// kondisi jika klik pada kotak yang sudah valid untuk melangkah
+            else if (chosecard!=""&&(papan[ctridx].getTag().toString()=="valid"||papan[ctridx].getTag().toString()=="armyP2"||papan[ctridx].getTag().toString()=="kingP2")){// kondisi jika klik pada kotak yang sudah valid untuk melangkah
+                if (papan[ctridx].getTag().toString()=="armyP2"){
+                    jumpionP2--
+                }
+                else if (papan[ctridx].getTag().toString()=="kingP2"){
+                    jumpionP2=0
+                }
                 papan[ctridx].setImageDrawable(resources.getDrawable(R.drawable.blue_pawn))//merubah posisi pion pada kotak yang valid
                 papan[ctridx].setTag(papan[pionpick].getTag())//set tag posisi pion baru dengan tag yang sebelumnya di posisi lama
 
@@ -210,6 +223,8 @@ class MainActivity : AppCompatActivity() {
                 papan[pionpick].setImageDrawable(resources.getDrawable(R.drawable.blank_background))// menghapus gambar pion pada posisi sebelumnya
 
                 changeTurn()
+
+                checkWin()
             }
         }
         else if (turn=="P2"){
@@ -223,12 +238,16 @@ class MainActivity : AppCompatActivity() {
                     //karena papan menggunakan arraylist dan card yang dibuat dalam bentuk array maka rumus yang digunakan yaitu
                     //idxlangkah yang x dikurangi dengan posisi pion yang diklik
                     //idxlangkah yang y * 5 dan ditambah posisi pion yang diklik, dalam kasus ini p2 arah jalannya ke bawah maka harus ditambah
+                    var banding1 = Math.ceil((posvalid/5).toDouble())//nilai pembulatan ke atas dari posisi valid sebelum ditambah kordinat langkah valid
                     posvalid-=(idxlangkah[i][0])//untuk menghitung kordinat x
+                    var banding2 = Math.ceil((posvalid/5).toDouble())//nilai pembulatan ke atas dari posisi valid sesudah ditambah kordinat x langkah valid
                     posvalid+=(5*idxlangkah[i][1])// untuk menghitung kordinat y
                     try {
-                        if (papan[posvalid].getTag()!="armyP2"&&papan[posvalid].getTag()!="kingP2") {// melakukan pengecekan apakah langkah yang divalidasi merupakan tempat pin kelompok P1
+                        if (papan[posvalid].getTag()!="armyP2"&&papan[posvalid].getTag()!="kingP2"&&banding1==banding2) {// melakukan pengecekan apakah langkah yang divalidasi merupakan tempat pin kelompok P1
                             papan[posvalid].setBackgroundColor(resources.getColor(R.color.valid_papan))
-                            papan[posvalid].setTag("valid")
+                            if (papan[posvalid].getTag()!="armyP1"&&papan[posvalid].getTag()!="kingP1") {
+                                papan[posvalid].setTag("valid")
+                            }
                         }
                     }
                     catch (e: Exception){
@@ -237,7 +256,15 @@ class MainActivity : AppCompatActivity() {
                 }
 
             }
-            else if (papan[ctridx].getTag().toString()=="valid"){// kondisi jika klik pada kotak yang sudah valid untuk melangkah
+            else if (chosecard!=""&&(papan[ctridx].getTag().toString()=="valid"||papan[ctridx].getTag().toString()=="armyP1"||papan[ctridx].getTag().toString()=="kingP1")){// kondisi jika klik pada kotak yang sudah valid untuk melangkah
+                //untuk mengecek apakah langkah dari pion ini menuju pion yang akan dikalahkan
+                if (papan[ctridx].getTag().toString()=="armyP1"){
+                    jumpionP1--
+                }
+                else if (papan[ctridx].getTag().toString()=="kingP1"){
+                    jumpionP1=0
+                }
+
                 papan[ctridx].setImageDrawable(resources.getDrawable(R.drawable.red_pawn))//merubah posisi pion pada kotak yang valid
                 papan[ctridx].setTag(papan[pionpick].getTag())//set tag posisi pion baru dengan tag yang sebelumnya di posisi lama
 
@@ -246,6 +273,8 @@ class MainActivity : AppCompatActivity() {
                 papan[pionpick].setImageDrawable(resources.getDrawable(R.drawable.blank_background))// menghapus gambar pion pada posisi sebelumnya
 
                 changeTurn()
+
+                checkWin()
             }
 
         }
@@ -287,5 +316,20 @@ class MainActivity : AppCompatActivity() {
         chosecard = ""
         pionpick = -1
 
+    }
+
+    fun checkWin(){
+        if (jumpionP1<=0){
+            var intent = Intent(this,EndGame::class.java).apply {
+                putExtra("pemenang", "Player2")
+            }
+            startActivity(intent)
+        }
+        else if (jumpionP2<=0){
+            var intent = Intent(this,EndGame::class.java).apply {
+                putExtra("pemenang", "Player1")
+            }
+            startActivity(intent)
+        }
     }
 }
