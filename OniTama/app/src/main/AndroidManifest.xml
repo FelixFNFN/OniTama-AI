@@ -13,6 +13,9 @@
         android:theme="@style/Theme.OniTama"
         tools:targetApi="31">
         <activity
+            android:name=".TwoPlayer"
+            android:exported="false" />
+        <activity
             android:name=".EndGame"
             android:exported="false" />
         <activity
@@ -28,6 +31,10 @@
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
+
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
     </application>
 
 </manifest>

@@ -3,8 +3,10 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Github/OniTama-AI/OniTama/app/src/main/res/drawable/blue_pawn.xml" value="0.1415" />
         <entry key="..\:/Github/OniTama-AI/OniTama/app/src/main/res/layout/activity_end_game.xml" value="0.2391304347826087" />
-        <entry key="..\:/Github/OniTama-AI/OniTama/app/src/main/res/layout/activity_main.xml" value="0.20742753623188406" />
+        <entry key="..\:/Github/OniTama-AI/OniTama/app/src/main/res/layout/activity_main.xml" value="0.2" />
+        <entry key="..\:/Github/OniTama-AI/OniTama/app/src/main/res/layout/activity_two_player.xml" value="0.2391304347826087" />
       </map>
     </option>
   </component>
