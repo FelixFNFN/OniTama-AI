@@ -11,7 +11,8 @@ import androidx.appcompat.app.AppCompatActivity
 
 class TwoPlayer : AppCompatActivity() {
 
-    lateinit var papan:MutableList<ImageButton>
+    lateinit var papan:ArrayList<ImageButton>
+    lateinit var papanAI:ArrayList<String>
     lateinit var allcard:ArrayList<String>
     lateinit var setupgame : GameSetup
     lateinit var textView6 : TextView
@@ -38,6 +39,7 @@ class TwoPlayer : AppCompatActivity() {
     private var jumpionP2 = 5
     private var isVSAI = false
     private var posvalidAI = -1
+    private var posvalidAIbefore = -1
     private var cardAI = "card"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,7 +54,8 @@ class TwoPlayer : AppCompatActivity() {
         cardP2_1 = findViewById(R.id.cardP2_1)
         cardP2_2 = findViewById(R.id.cardP2_2)
         cardNextP2 = findViewById(R.id.cardNextP2)
-        papan = mutableListOf<ImageButton>()
+        papan = ArrayList<ImageButton>()
+        papanAI = ArrayList<String>()
         allcard = ArrayList<String>()
 
         isVSAI = intent.getBooleanExtra("isAI",false)
@@ -66,21 +69,26 @@ class TwoPlayer : AppCompatActivity() {
                 if (i==1){
                     if (j==3){
                         papan[papan.size-1].setTag("kingP2")
+                        papanAI.add("kingP2")
                     }
                     else{
                         papan[papan.size-1].setTag("armyP2")
+                        papanAI.add("armyP2")
                     }
                 }
                 else if (i==5){
                     if (j==3){
                         papan[papan.size-1].setTag("kingP1")
+                        papanAI.add("kingP1")
                     }
                     else{
                         papan[papan.size-1].setTag("armyP1")
+                        papanAI.add("armyP1")
                     }
                 }
                 else{
                     papan[papan.size-1].setTag("empty")
+                    papanAI.add("empty")
                 }
             }
         }
@@ -223,7 +231,7 @@ class TwoPlayer : AppCompatActivity() {
 
                 } else if (chosecard != "" && (papan[ctridx].getTag()
                         .toString() == "valid" || papan[ctridx].getTag()
-                        .toString() == "armyP2v" || papan[ctridx].getTag().toString() == "kingP2v")
+                        .toString() == "armyP1v" || papan[ctridx].getTag().toString() == "kingP1v")
                 ) {// kondisi jika klik pada kotak yang sudah valid untuk melangkah
                     if (papan[ctridx].getTag().toString() == "armyP2v") {
                         jumpionP2--
@@ -362,10 +370,13 @@ class TwoPlayer : AppCompatActivity() {
                     }
                     papan[ctridx].setImageDrawable(resources.getDrawable(R.drawable.blue_pawn))//merubah posisi pion pada kotak yang valid
                     papan[ctridx].setTag(papan[pionpick].getTag())//set tag posisi pion baru dengan tag yang sebelumnya di posisi lama
+                    papanAI[ctridx]=papan[pionpick].getTag().toString()
 
                     whiteAllboard()// memutihkan semua papan
                     papan[pionpick].setTag("empty")// mengubah tag posisi pion yang sebelumnya ke empty
+                    papanAI[pionpick]="empty"
                     papan[pionpick].setImageDrawable(resources.getDrawable(R.drawable.blank_background))// menghapus gambar pion pada posisi sebelumnya
+
 
 //                    changeTurnAI()
 //                    var getpapan = alphabetaPruning(papan,allcard,0,true,jumpionP1,jumpionP2,0,0)
@@ -402,21 +413,33 @@ class TwoPlayer : AppCompatActivity() {
 //                    papancopy = ArrayList()
 //                    papancopy.addAll(papan.clone() as ArrayList<ImageButton>)
 
-                    val temp :MutableList<ImageButton>
-                    temp = mutableListOf<ImageButton>()
-                    temp.addAll(papan)
-//                    var papancopy : MutableList<ImageButton>
-//                    papancopy = mutableListOf()
-//                    papancopy.addAll(papan)
-                    val papancopy = ArrayList(temp)
+//                    val temp :MutableList<ImageButton>
+//                    temp = mutableListOf<ImageButton>()
+//                    temp.addAll(papan)
+////                    var papancopy : MutableList<ImageButton>
+////                    papancopy = mutableListOf()
+////                    papancopy.addAll(papan)
+//                    val papancopy = ArrayList(temp)
 
 
-                    papancopy[2].setTag("emptysaja")
-                    Log.i("ini papan", papan[2].getTag().toString())
-                    Log.i("ini papan lead", papancopy[2].getTag().toString())
+                    changeTurnAI()
+                    Log.i("posvalid",allcard.toString())
 
-                    alphabeta(papancopy,allcard,3,true,Integer.MIN_VALUE,Integer.MAX_VALUE)
+                    alphabeta(papanAI,allcard,3,true,Integer.MIN_VALUE,Integer.MAX_VALUE)
 
+
+                    // di bawah ini untuk memindahkan pion AI
+                    var tagbefore = papan[posvalidAIbefore].getTag()
+                    papan[posvalidAIbefore].setImageDrawable(resources.getDrawable(R.drawable.blank_background))
+                    papan[posvalidAIbefore].setTag("empty")
+                    papanAI[posvalidAIbefore]=("empty")
+
+                    papan[posvalidAI].setImageDrawable(resources.getDrawable(R.drawable.red_pawn))
+                    papan[posvalidAI].setTag("$tagbefore")
+                    papanAI[posvalidAI]=("$tagbefore")
+
+                    changeTurnAI()
+                    Log.i("posvalid",allcard.toString())
 
                     Log.i("posvalid",posvalidAI.toString())
                     Log.i("cardvalid",cardAI.toString())
@@ -430,7 +453,7 @@ class TwoPlayer : AppCompatActivity() {
     }
 
 
-    fun alphabeta(papancopy:MutableList<ImageButton>, allcard:ArrayList<String>, depth:Int, isMaximaize:Boolean, alpha:Int, beta:Int) : Int{
+    fun alphabeta(papancopy:ArrayList<String>, allcard:ArrayList<String>, depth:Int, isMaximaize:Boolean, alpha:Int, beta:Int) : Int{
 //        if (papancopy)// di sini harus mengecek apakah ai bisa menang
 //        if(depth<=0){
 //            int curcoun
@@ -442,7 +465,7 @@ class TwoPlayer : AppCompatActivity() {
             for (i in 2..3){// ini untuk ngeloop card
                 var idxlangkah = setupgame.getCard(allcard[i])
                 for(j in 0..papancopy.size-1){// untuk mengecek seluruh papancopy
-                    if (papancopy[j].getTag()=="empty"||papancopy[j].getTag()=="armyP1"||papancopy[j].getTag()=="kingP1"){// di sini jika ketemu kordinat yang tidak pasti langsung dicontinue
+                    if (papancopy[j]=="empty"||papancopy[j]=="armyP1"||papancopy[j]=="kingP1"){// di sini jika ketemu kordinat yang tidak pasti langsung dicontinue
                         continue
                     }
                     for(k in 0..idxlangkah.size-1){
@@ -455,19 +478,19 @@ class TwoPlayer : AppCompatActivity() {
                         posvalid -= (5 * idxlangkah[k][1])// untuk menghitung kordinat y
 
                         try {
-                            if (papancopy[posvalid].getTag() != "armyP2" && papancopy[posvalid].getTag() != "kingP2" && banding1 == banding2) {// melakukan pengecekan apakah langkah yang divalidasi merupakan tempat pin kelompok P1
+                            if (papancopy[posvalid] != "armyP2" && papancopy[posvalid] != "kingP2" && banding1 == banding2) {// melakukan pengecekan apakah langkah yang divalidasi merupakan tempat pin kelompok P1
 //                                    papancopy[posvalid].setBackgroundColor(resources.getColor(R.color.valid_papan))
                                 // harus membuat bentuk papancopy setelah pion dipindahkan dan dimasukkan ke dalam recursive
                                 // di bawah ini belum tentu jalan sempurna
                                 var kordinatsekarang = posvalid
                                 var cardsekarang = allcard[i]
-                                var tagbefore = papancopy[j].getTag()
-                                papancopy[j].setTag("empty")
+                                var tagbefore = papancopy[j]
+                                papancopy[j]="empty"
                                 if (depth<=0) {
-                                    if (papancopy[posvalid].getTag()=="kingP1"||posvalid == 22){
+                                    if (papancopy[posvalid]=="kingP1"||posvalid == 22){
                                         return 100
                                     }
-                                    else if(papancopy[posvalid].getTag()=="armyP1"){
+                                    else if(papancopy[posvalid]=="armyP1"){
                                         return 50
                                     }
                                     else {
@@ -479,7 +502,7 @@ class TwoPlayer : AppCompatActivity() {
                                 allcard[i] = allcard[4]
                                 allcard[4] = tempnamecard
                                 // di bawah ini untuk mengubah tag posisi pion baru dengan nama tag posisi sebelumnya
-                                papancopy[posvalid].setTag("$tagbefore")
+                                papancopy[posvalid]="$tagbefore"
 
                                 // menampung nilai return dari recursive
                                 var retVal = alphabeta(papancopy, allcard,depth-1,false,alpha,beta)
@@ -488,6 +511,7 @@ class TwoPlayer : AppCompatActivity() {
                                     v = retVal // nilai v diganti dengan nilai max
                                     if(alpha<v){// jika alpha kurang dari nilai v (nilai alpha itu adalah min tak hingga)
                                         if (depth == 3){// jika sudah di kedalaman 3 maka dibuat kordinat yang paling baik untuk dituju
+                                            posvalidAIbefore = j
                                             posvalidAI = kordinatsekarang
                                             cardAI = cardsekarang
                                         }
@@ -514,7 +538,7 @@ class TwoPlayer : AppCompatActivity() {
             for (i in 0..1){// ini untuk ngeloop card
                 var idxlangkah = setupgame.getCard(allcard[i])
                 for(j in 0..papancopy.size-1){// untuk mengecek seluruh papancopy
-                    if (papancopy[j].getTag()=="empty"||papancopy[j].getTag()=="armyP2"||papancopy[j].getTag()=="kingP2"){// di sini jika ketemu kordinat yang tidak pasti langsung dicontinue
+                    if (papancopy[j]=="empty"||papancopy[j]=="armyP2"||papancopy[j]=="kingP2"){// di sini jika ketemu kordinat yang tidak pasti langsung dicontinue
                         continue
                     }
                     for(k in 0..idxlangkah.size-1){
@@ -527,16 +551,16 @@ class TwoPlayer : AppCompatActivity() {
                         posvalid -= (5 * idxlangkah[k][1])// untuk menghitung kordinat y
 
                         try {
-                            if (papancopy[posvalid].getTag() != "armyP1" && papancopy[posvalid].getTag() != "kingP1" && banding1 == banding2) {// melakukan pengecekan apakah langkah yang divalidasi merupakan tempat pin kelompok P1
+                            if (papancopy[posvalid] != "armyP1" && papancopy[posvalid] != "kingP1" && banding1 == banding2) {// melakukan pengecekan apakah langkah yang divalidasi merupakan tempat pin kelompok P1
 //                                    papancopy[posvalid].setBackgroundColor(resources.getColor(R.color.valid_papan))
                                 // harus membuat bentuk papancopy setelah pion dipindahkan dan dimasukkan ke dalam recursive
-                                var tagbefore = papancopy[j].getTag()
-                                papancopy[j].setTag("empty")
+                                var tagbefore = papancopy[j]
+                                papancopy[j]="empty"
                                 if (depth<=0) {
-                                    if (papancopy[posvalid].getTag()=="kingP2"||posvalid == 2){
+                                    if (papancopy[posvalid]=="kingP2"||posvalid == 2){
                                         return -100
                                     }
-                                    else if(papancopy[posvalid].getTag()=="armyP2"){
+                                    else if(papancopy[posvalid]=="armyP2"){
                                         return -50
                                     }
                                     else {
@@ -548,7 +572,7 @@ class TwoPlayer : AppCompatActivity() {
                                 allcard[i] = allcard[4]
                                 allcard[4] = tempnamecard
                                 // di bawah ini untuk mengubah tag posisi pion baru dengan nama tag posisi sebelumnya
-                                papancopy[posvalid].setTag("$tagbefore")
+                                papancopy[posvalid]="$tagbefore"
 
                                 // menampung nilai return dari recursive
                                 var retVal = alphabeta(papancopy, allcard,depth-1,false,alpha,beta)
@@ -627,9 +651,6 @@ class TwoPlayer : AppCompatActivity() {
 
     fun changeTurnAI(){
         if (turn == "P1"){// kondisi jika player 1 selesai bermain
-            turn = "AI"
-            cardNextP2.setText(chosecard)
-            allcard.set(5,chosecard.toString())
             if (cardP1_1.text==chosecard){
                 cardP1_1.setText(cardNextP1.text)
                 allcard.set(0,cardNextP1.text.toString())
@@ -640,21 +661,25 @@ class TwoPlayer : AppCompatActivity() {
             }
             cardNextP1.setText("")
 
+            allcard.set(4,chosecard)
+            cardNextP2.setText(allcard[4])
+            turn = "AI"
         }
-//        else{// kondisi jika player AI selesai bermain
-//            turn = "P1"
-//            cardNextP1.setText(chosecard)
-//            allcard.set(5,chosecard.toString())
-//            if (cardP2_1.text==chosecard){
-//                cardP2_1.setText(cardNextP2.text)
-//                allcard.set(2,cardNextP2.text.toString())
-//            }
-//            else{
-//                cardP2_2.setText(cardNextP2.text)
-//                allcard.set(3,cardNextP2.text.toString())
-//            }
-//            cardNextP2.setText("")
-//        }
+        else{// kondisi jika player AI selesai bermain
+            if (cardP2_1.text==cardAI){
+                cardP2_1.setText(cardNextP2.text)
+                allcard.set(2,cardNextP2.text.toString())
+            }
+            else{
+                cardP2_2.setText(cardNextP2.text)
+                allcard.set(3,cardNextP2.text.toString())
+            }
+            cardNextP2.setText("")
+
+            allcard.set(4,cardAI)
+            cardNextP1.setText(allcard[4])
+            turn = "P1"
+        }
         chosecard = ""
         pionpick = -1
 
