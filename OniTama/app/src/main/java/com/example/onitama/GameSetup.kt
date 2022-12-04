@@ -3,7 +3,7 @@ package com.example.onitama
 class GameSetup {
     private var allcard: Array<String> = arrayOf<String>("TIGER","DRAGON","FROG","RABBIT","CRAB","ELEPHANT","GOOSE","ROOSTER","MONKEY","MANTIS","HORSE","OX","CRANE","BOAR","EEL","COBRA")
     private var TIGER : Array<IntArray> = arrayOf(intArrayOf(0,2), intArrayOf(0,-1))// semua index mulai dari atas pojok kiri
-    private var DRAGON : Array<IntArray> = arrayOf(intArrayOf(-2,1),intArrayOf(2,1),intArrayOf(-1,-1),intArrayOf(1,1))
+    private var DRAGON : Array<IntArray> = arrayOf(intArrayOf(-2,1),intArrayOf(2,1),intArrayOf(-1,-1),intArrayOf(1,-1))
     private var FROG : Array<IntArray> = arrayOf(intArrayOf(-1,1),intArrayOf(-2,0),intArrayOf(1,-1))
     private var RABBIT : Array<IntArray> = arrayOf(intArrayOf(1,1),intArrayOf(2,0),intArrayOf(-1,-1))
     private var CRAB : Array<IntArray> = arrayOf(intArrayOf(0,1),intArrayOf(-2,0),intArrayOf(2,0))

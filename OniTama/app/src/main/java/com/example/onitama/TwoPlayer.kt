@@ -1,17 +1,18 @@
 package com.example.onitama
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
-import java.lang.Exception
+import androidx.appcompat.app.AppCompatActivity
 
 class TwoPlayer : AppCompatActivity() {
 
-    lateinit var papan:ArrayList<ImageButton>
+    lateinit var papan:MutableList<ImageButton>
+    lateinit var allcard:ArrayList<String>
     lateinit var setupgame : GameSetup
     lateinit var textView6 : TextView
     lateinit var cardP1_1: Button
@@ -35,6 +36,9 @@ class TwoPlayer : AppCompatActivity() {
     private var pionpick = -1
     private var jumpionP1 = 5
     private var jumpionP2 = 5
+    private var isVSAI = false
+    private var posvalidAI = -1
+    private var cardAI = "card"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,7 +52,10 @@ class TwoPlayer : AppCompatActivity() {
         cardP2_1 = findViewById(R.id.cardP2_1)
         cardP2_2 = findViewById(R.id.cardP2_2)
         cardNextP2 = findViewById(R.id.cardNextP2)
-        papan = ArrayList<ImageButton>()
+        papan = mutableListOf<ImageButton>()
+        allcard = ArrayList<String>()
+
+        isVSAI = intent.getBooleanExtra("isAI",false)
 
         for (i in 1..5){//dalam loop ini akan menambahkan tiap kotak dalam papan ke arraylist
             for (j in 1..5){
@@ -151,6 +158,12 @@ class TwoPlayer : AppCompatActivity() {
         cardP2_2.setText(card4)
         cardNextP2.setText("")
 
+        allcard.add(card1)//card player 1/human
+        allcard.add(card2)
+        allcard.add(card3)//card player 2/AI
+        allcard.add(card4)
+        allcard.add(card5)// extra card
+
     }
 
     fun kotakClick(v: View){
@@ -164,111 +177,401 @@ class TwoPlayer : AppCompatActivity() {
         }
 //        papan[ctridx].setBackgroundColor(resources.getColor(R.color.valid_papan))
 
-        //di bawah ini melakukan pengecekan
-        if (turn=="P1"){
-            if (chosecard!=""&&(papan[ctridx].getTag().toString()=="kingP1"||papan[ctridx].getTag().toString()=="armyP1")){
-                var idxlangkah = setupgame.getCard(chosecard)// mendapatkan array dari card yang diklik
-                pionpick = ctridx//menyimpan index nilai pion yang dipilih
-                whiteAllboard()// memutihkan seluruh papan
-                var posvalid = ctridx
-                for (i in 0..idxlangkah.size-1){
-                    posvalid = ctridx
-                    //karena papan menggunakan arraylist dan card yang dibuat dalam bentuk array maka rumus yang digunakan yaitu
-                    //idxlangkah yang x ditambah dengan posisi pion yang diklik
-                    //idxlangkah yang y * 5 dan dikurangi posisi pion yang diklik, dalam kasus ini p1 arah jalannya ke atas maka harus dikurangi
+        if (isVSAI == false) {
+            //di bawah ini melakukan pengecekan
+            if (turn == "P1") {
+                if (chosecard != "" && (papan[ctridx].getTag()
+                        .toString() == "kingP1" || papan[ctridx].getTag().toString() == "armyP1")
+                ) {
+                    var idxlangkah =
+                        setupgame.getCard(chosecard)// mendapatkan array dari card yang diklik
+                    pionpick = ctridx//menyimpan index nilai pion yang dipilih
+                    whiteAllboard()// memutihkan seluruh papan
+                    var posvalid = ctridx
+                    for (i in 0..idxlangkah.size - 1) {
+                        posvalid = ctridx
+                        //karena papan menggunakan arraylist dan card yang dibuat dalam bentuk array maka rumus yang digunakan yaitu
+                        //idxlangkah yang x ditambah dengan posisi pion yang diklik
+                        //idxlangkah yang y * 5 dan dikurangi posisi pion yang diklik, dalam kasus ini p1 arah jalannya ke atas maka harus dikurangi
 
 //                    Log.i("nilaibandingpos1", Math.ceil((posvalid/5).toDouble()).toString())
-                    var banding1 = Math.ceil((posvalid/5).toDouble())//nilai pembulatan ke atas dari posisi valid sebelum ditambah kordinat langkah valid
-                    posvalid+=(idxlangkah[i][0])//untuk menghitung kordinat x
+                        var banding1 =
+                            Math.ceil((posvalid / 5).toDouble())//nilai pembulatan ke atas dari posisi valid sebelum ditambah kordinat langkah valid
+                        posvalid += (idxlangkah[i][0])//untuk menghitung kordinat x
 //                    Log.i("nilaibandingpos2", Math.ceil((posvalid/5).toDouble()).toString())
-                    var banding2 = Math.ceil((posvalid/5).toDouble())//nilai pembulatan ke atas dari posisi valid sesudah ditambah kordinat x langkah valid
-                    posvalid-=(5*idxlangkah[i][1])// untuk menghitung kordinat y
+                        var banding2 =
+                            Math.ceil((posvalid / 5).toDouble())//nilai pembulatan ke atas dari posisi valid sesudah ditambah kordinat x langkah valid
+                        posvalid -= (5 * idxlangkah[i][1])// untuk menghitung kordinat y
 //                    Log.i("kor x", Arrays.deepToString(arrayOf(idxlangkah[i][0])) )
 //                    Log.i("kor y", Arrays.deepToString(arrayOf(idxlangkah[i][1])) )
 
-                    try {
-                        if (papan[posvalid].getTag()!="armyP1"&&papan[posvalid].getTag()!="kingP1"&&banding1==banding2) {// melakukan pengecekan apakah langkah yang divalidasi merupakan tempat pin kelompok P1
-                            papan[posvalid].setBackgroundColor(resources.getColor(R.color.valid_papan))
-                            if (papan[posvalid].getTag()!="armyP2"&&papan[posvalid].getTag()!="kingP2") {
-                                papan[posvalid].setTag("valid")
+                        try {
+                            if (papan[posvalid].getTag() != "armyP1" && papan[posvalid].getTag() != "kingP1" && banding1 == banding2) {// melakukan pengecekan apakah langkah yang divalidasi merupakan tempat pin kelompok P1
+                                papan[posvalid].setBackgroundColor(resources.getColor(R.color.valid_papan))
+                                if (papan[posvalid].getTag() != "armyP2" && papan[posvalid].getTag() != "kingP2") {
+                                    papan[posvalid].setTag("valid")
+                                } else if (papan[posvalid].getTag() == "armyP2") {
+                                    papan[posvalid].setTag("army21v")
+                                } else if (papan[posvalid].getTag() == "kingP2") {
+                                    papan[posvalid].setTag("kingP2v")
+                                }
                             }
+                        } catch (e: Exception) {
+
                         }
                     }
-                    catch (e: Exception){
 
+                } else if (chosecard != "" && (papan[ctridx].getTag()
+                        .toString() == "valid" || papan[ctridx].getTag()
+                        .toString() == "armyP2v" || papan[ctridx].getTag().toString() == "kingP2v")
+                ) {// kondisi jika klik pada kotak yang sudah valid untuk melangkah
+                    if (papan[ctridx].getTag().toString() == "armyP2v") {
+                        jumpionP2--
+                    } else if (papan[ctridx].getTag().toString() == "kingP2v" || ctridx == 2) {
+                        jumpionP2 = 0
                     }
+                    papan[ctridx].setImageDrawable(resources.getDrawable(R.drawable.blue_pawn))//merubah posisi pion pada kotak yang valid
+                    papan[ctridx].setTag(papan[pionpick].getTag())//set tag posisi pion baru dengan tag yang sebelumnya di posisi lama
+
+                    whiteAllboard()// memutihkan semua papan
+                    papan[pionpick].setTag("empty")// mengubah tag posisi pion yang sebelumnya ke empty
+                    papan[pionpick].setImageDrawable(resources.getDrawable(R.drawable.blank_background))// menghapus gambar pion pada posisi sebelumnya
+
+                    changeTurn()
+
+                    checkWin()
+                }
+            } else if (turn == "P2") {
+                if (chosecard != "" && (papan[ctridx].getTag()
+                        .toString() == "kingP2" || papan[ctridx].getTag().toString() == "armyP2")
+                ) {
+                    var idxlangkah =
+                        setupgame.getCard(chosecard)// mendapatkan array dari card yang diklik
+                    pionpick = ctridx//menyimpan index nilai pion yang dipilih
+                    whiteAllboard()// memutihkan seluruh papan
+                    var posvalid = ctridx
+                    for (i in 0..idxlangkah.size - 1) {
+                        posvalid = ctridx
+                        //karena papan menggunakan arraylist dan card yang dibuat dalam bentuk array maka rumus yang digunakan yaitu
+                        //idxlangkah yang x dikurangi dengan posisi pion yang diklik
+                        //idxlangkah yang y * 5 dan ditambah posisi pion yang diklik, dalam kasus ini p2 arah jalannya ke bawah maka harus ditambah
+                        var banding1 =
+                            Math.ceil((posvalid / 5).toDouble())//nilai pembulatan ke atas dari posisi valid sebelum ditambah kordinat langkah valid
+                        posvalid -= (idxlangkah[i][0])//untuk menghitung kordinat x
+                        var banding2 =
+                            Math.ceil((posvalid / 5).toDouble())//nilai pembulatan ke atas dari posisi valid sesudah ditambah kordinat x langkah valid
+                        posvalid += (5 * idxlangkah[i][1])// untuk menghitung kordinat y
+                        try {
+                            if (papan[posvalid].getTag() != "armyP2" && papan[posvalid].getTag() != "kingP2" && banding1 == banding2) {// melakukan pengecekan apakah langkah yang divalidasi merupakan tempat pin kelompok P1
+                                papan[posvalid].setBackgroundColor(resources.getColor(R.color.valid_papan))
+                                if (papan[posvalid].getTag() != "armyP1" && papan[posvalid].getTag() != "kingP1") {
+                                    papan[posvalid].setTag("valid")
+                                } else if (papan[posvalid].getTag() == "armyP1") {
+                                    papan[posvalid].setTag("armyP1v")
+                                } else if (papan[posvalid].getTag() == "kingP1") {
+                                    papan[posvalid].setTag("kingP1v")
+                                }
+                            }
+                        } catch (e: Exception) {
+
+                        }
+                    }
+
+                } else if (chosecard != "" && (papan[ctridx].getTag()
+                        .toString() == "valid" || papan[ctridx].getTag()
+                        .toString() == "armyP1v" || papan[ctridx].getTag().toString() == "kingP1v")
+                ) {// kondisi jika klik pada kotak yang sudah valid untuk melangkah
+                    //untuk mengecek apakah langkah dari pion ini menuju pion yang akan dikalahkan
+                    if (papan[ctridx].getTag().toString() == "armyP1v") {
+                        jumpionP1--
+                    } else if (papan[ctridx].getTag().toString() == "kingP1v" || ctridx == 22) {
+                        jumpionP1 = 0
+                    }
+
+                    papan[ctridx].setImageDrawable(resources.getDrawable(R.drawable.red_pawn))//merubah posisi pion pada kotak yang valid
+                    papan[ctridx].setTag(papan[pionpick].getTag())//set tag posisi pion baru dengan tag yang sebelumnya di posisi lama
+
+                    whiteAllboard()// memutihkan semua papan
+                    papan[pionpick].setTag("empty")// mengubah tag posisi pion yang sebelumnya ke empty
+                    papan[pionpick].setImageDrawable(resources.getDrawable(R.drawable.blank_background))// menghapus gambar pion pada posisi sebelumnya
+
+                    changeTurn()
+
+                    checkWin()
                 }
 
-            }
-            else if (chosecard!=""&&(papan[ctridx].getTag().toString()=="valid"||papan[ctridx].getTag().toString()=="armyP2"||papan[ctridx].getTag().toString()=="kingP2")){// kondisi jika klik pada kotak yang sudah valid untuk melangkah
-                if (papan[ctridx].getTag().toString()=="armyP2"){
-                    jumpionP2--
-                }
-                else if (papan[ctridx].getTag().toString()=="kingP2"){
-                    jumpionP2=0
-                }
-                papan[ctridx].setImageDrawable(resources.getDrawable(R.drawable.blue_pawn))//merubah posisi pion pada kotak yang valid
-                papan[ctridx].setTag(papan[pionpick].getTag())//set tag posisi pion baru dengan tag yang sebelumnya di posisi lama
-
-                whiteAllboard()// memutihkan semua papan
-                papan[pionpick].setTag("empty")// mengubah tag posisi pion yang sebelumnya ke empty
-                papan[pionpick].setImageDrawable(resources.getDrawable(R.drawable.blank_background))// menghapus gambar pion pada posisi sebelumnya
-
-                changeTurn()
-
-                checkWin()
             }
         }
-        else if (turn=="P2"){
-            if (chosecard!=""&&(papan[ctridx].getTag().toString()=="kingP2"||papan[ctridx].getTag().toString()=="armyP2")){
-                var idxlangkah = setupgame.getCard(chosecard)// mendapatkan array dari card yang diklik
-                pionpick = ctridx//menyimpan index nilai pion yang dipilih
-                whiteAllboard()// memutihkan seluruh papan
-                var posvalid = ctridx
-                for (i in 0..idxlangkah.size-1){
-                    posvalid = ctridx
-                    //karena papan menggunakan arraylist dan card yang dibuat dalam bentuk array maka rumus yang digunakan yaitu
-                    //idxlangkah yang x dikurangi dengan posisi pion yang diklik
-                    //idxlangkah yang y * 5 dan ditambah posisi pion yang diklik, dalam kasus ini p2 arah jalannya ke bawah maka harus ditambah
-                    var banding1 = Math.ceil((posvalid/5).toDouble())//nilai pembulatan ke atas dari posisi valid sebelum ditambah kordinat langkah valid
-                    posvalid-=(idxlangkah[i][0])//untuk menghitung kordinat x
-                    var banding2 = Math.ceil((posvalid/5).toDouble())//nilai pembulatan ke atas dari posisi valid sesudah ditambah kordinat x langkah valid
-                    posvalid+=(5*idxlangkah[i][1])// untuk menghitung kordinat y
-                    try {
-                        if (papan[posvalid].getTag()!="armyP2"&&papan[posvalid].getTag()!="kingP2"&&banding1==banding2) {// melakukan pengecekan apakah langkah yang divalidasi merupakan tempat pin kelompok P1
-                            papan[posvalid].setBackgroundColor(resources.getColor(R.color.valid_papan))
-                            if (papan[posvalid].getTag()!="armyP1"&&papan[posvalid].getTag()!="kingP1") {
-                                papan[posvalid].setTag("valid")
+        else{
+            //di bawah ini melakukan pengecekan
+            if (turn == "P1") {
+                Log.i("isklik", "ini klik ${papan[ctridx].getTag()}")
+//                for (kotak in papan){
+//                    Log.i("papantag",kotak.getTag().toString())
+//                }
+                if (chosecard != "" && (papan[ctridx].getTag()
+                        .toString() == "kingP1" || papan[ctridx].getTag().toString() == "armyP1")
+                ) {
+                    var idxlangkah =
+                        setupgame.getCard(chosecard)// mendapatkan array dari card yang diklik
+                    pionpick = ctridx//menyimpan index nilai pion yang dipilih
+                    whiteAllboard()// memutihkan seluruh papan
+                    var posvalid = ctridx
+                    for (i in 0..idxlangkah.size - 1) {
+                        posvalid = ctridx
+                        //karena papan menggunakan arraylist dan card yang dibuat dalam bentuk array maka rumus yang digunakan yaitu
+                        //idxlangkah yang x ditambah dengan posisi pion yang diklik
+                        //idxlangkah yang y * 5 dan dikurangi posisi pion yang diklik, dalam kasus ini p1 arah jalannya ke atas maka harus dikurangi
+
+//                    Log.i("nilaibandingpos1", Math.ceil((posvalid/5).toDouble()).toString())
+                        var banding1 =
+                            Math.ceil((posvalid / 5).toDouble())//nilai pembulatan ke atas dari posisi valid sebelum ditambah kordinat langkah valid
+                        posvalid += (idxlangkah[i][0])//untuk menghitung kordinat x
+//                    Log.i("nilaibandingpos2", Math.ceil((posvalid/5).toDouble()).toString())
+                        var banding2 =
+                            Math.ceil((posvalid / 5).toDouble())//nilai pembulatan ke atas dari posisi valid sesudah ditambah kordinat x langkah valid
+                        posvalid -= (5 * idxlangkah[i][1])// untuk menghitung kordinat y
+//                    Log.i("kor x", Arrays.deepToString(arrayOf(idxlangkah[i][0])) )
+//                    Log.i("kor y", Arrays.deepToString(arrayOf(idxlangkah[i][1])) )
+                        Log.i("posvalid",posvalid.toString())
+
+                        try {
+                            if (papan[posvalid].getTag() != "armyP1" && papan[posvalid].getTag() != "kingP1" && banding1 == banding2) {// melakukan pengecekan apakah langkah yang divalidasi merupakan tempat pin kelompok P1
+                                papan[posvalid].setBackgroundColor(resources.getColor(R.color.valid_papan))
+                                if (papan[posvalid].getTag() != "armyP2" && papan[posvalid].getTag() != "kingP2") {
+                                    papan[posvalid].setTag("valid")
+                                } else if (papan[posvalid].getTag() == "armyP2") {
+                                    papan[posvalid].setTag("army21v")
+                                } else if (papan[posvalid].getTag() == "kingP2") {
+                                    papan[posvalid].setTag("kingP2v")
+                                }
                             }
+                        } catch (e: Exception) {
+
                         }
                     }
-                    catch (e: Exception){
 
+                } else if (chosecard != "" && (papan[ctridx].getTag()
+                        .toString() == "valid" || papan[ctridx].getTag()
+                        .toString() == "armyP2v" || papan[ctridx].getTag().toString() == "kingP2v")
+                ) {// kondisi jika klik pada kotak yang sudah valid untuk melangkah
+                    if (papan[ctridx].getTag().toString() == "armyP2v") {
+                        jumpionP2--
+                    } else if (papan[ctridx].getTag().toString() == "kingP2v" || ctridx == 2) {
+                        jumpionP2 = 0
+                    }
+                    papan[ctridx].setImageDrawable(resources.getDrawable(R.drawable.blue_pawn))//merubah posisi pion pada kotak yang valid
+                    papan[ctridx].setTag(papan[pionpick].getTag())//set tag posisi pion baru dengan tag yang sebelumnya di posisi lama
+
+                    whiteAllboard()// memutihkan semua papan
+                    papan[pionpick].setTag("empty")// mengubah tag posisi pion yang sebelumnya ke empty
+                    papan[pionpick].setImageDrawable(resources.getDrawable(R.drawable.blank_background))// menghapus gambar pion pada posisi sebelumnya
+
+//                    changeTurnAI()
+//                    var getpapan = alphabetaPruning(papan,allcard,0,true,jumpionP1,jumpionP2,0,0)
+//
+//                    for (i in 0..getpapan.size-1) {
+//                        Log.i("papan", getpapan[i].getTag().toString())
+//                    }
+//
+
+//                    var papancopy : MutableList<ImageButton>
+//                    papancopy = ArrayList()
+//                    papancopy.addAll(papan)
+//                    var listcopy = ArrayList(papan)
+//                    var copy2 = papan.clone() as ArrayList<ImageButton>
+//                    val mutableList = papan.toMutableList()
+//                    var leadList1: ArrayList<ImageButton> = ArrayList()
+//                    leadList1.addAll(papan.filterNotNull())
+
+//                    val copy1 = papan
+
+//                    val papancopy : ArrayList<ImageButton> = ArrayList()
+//
+//                    for (kotak in papan){
+//                        papancopy.add(kotak)
+//                    }
+//
+//
+
+//                    val papancopy: ArrayList<ImageButton>
+//                    papancopy = ArrayList()
+//                    papancopy.addAll()
+//                    val papancopy = papan.clone() as ArrayList<ImageButton>
+//                    val papancopy : ArrayList<ImageButton>
+//                    papancopy = ArrayList()
+//                    papancopy.addAll(papan.clone() as ArrayList<ImageButton>)
+
+                    val temp :MutableList<ImageButton>
+                    temp = mutableListOf<ImageButton>()
+                    temp.addAll(papan)
+//                    var papancopy : MutableList<ImageButton>
+//                    papancopy = mutableListOf()
+//                    papancopy.addAll(papan)
+                    val papancopy = ArrayList(temp)
+
+
+                    papancopy[2].setTag("emptysaja")
+                    Log.i("ini papan", papan[2].getTag().toString())
+                    Log.i("ini papan lead", papancopy[2].getTag().toString())
+
+                    alphabeta(papancopy,allcard,3,true,Integer.MIN_VALUE,Integer.MAX_VALUE)
+
+
+                    Log.i("posvalid",posvalidAI.toString())
+                    Log.i("cardvalid",cardAI.toString())
+                    Log.i("turn", turn)
+
+                    checkWin()
+                }
+            }
+
+        }
+    }
+
+
+    fun alphabeta(papancopy:MutableList<ImageButton>, allcard:ArrayList<String>, depth:Int, isMaximaize:Boolean, alpha:Int, beta:Int) : Int{
+//        if (papancopy)// di sini harus mengecek apakah ai bisa menang
+//        if(depth<=0){
+//            int curcoun
+//            return
+//        }
+        if (isMaximaize){
+            //maximize untuk p2
+            var v = Integer.MIN_VALUE
+            for (i in 2..3){// ini untuk ngeloop card
+                var idxlangkah = setupgame.getCard(allcard[i])
+                for(j in 0..papancopy.size-1){// untuk mengecek seluruh papancopy
+                    if (papancopy[j].getTag()=="empty"||papancopy[j].getTag()=="armyP1"||papancopy[j].getTag()=="kingP1"){// di sini jika ketemu kordinat yang tidak pasti langsung dicontinue
+                        continue
+                    }
+                    for(k in 0..idxlangkah.size-1){
+                        var posvalid = j
+                        var banding1 =
+                            Math.ceil((posvalid / 5).toDouble())//nilai pembulatan ke atas dari posisi valid sebelum ditambah kordinat langkah valid
+                        posvalid += (idxlangkah[k][0])//untuk menghitung kordinat x
+                        var banding2 =
+                            Math.ceil((posvalid / 5).toDouble())//nilai pembulatan ke atas dari posisi valid sesudah ditambah kordinat x langkah valid
+                        posvalid -= (5 * idxlangkah[k][1])// untuk menghitung kordinat y
+
+                        try {
+                            if (papancopy[posvalid].getTag() != "armyP2" && papancopy[posvalid].getTag() != "kingP2" && banding1 == banding2) {// melakukan pengecekan apakah langkah yang divalidasi merupakan tempat pin kelompok P1
+//                                    papancopy[posvalid].setBackgroundColor(resources.getColor(R.color.valid_papan))
+                                // harus membuat bentuk papancopy setelah pion dipindahkan dan dimasukkan ke dalam recursive
+                                // di bawah ini belum tentu jalan sempurna
+                                var kordinatsekarang = posvalid
+                                var cardsekarang = allcard[i]
+                                var tagbefore = papancopy[j].getTag()
+                                papancopy[j].setTag("empty")
+                                if (depth<=0) {
+                                    if (papancopy[posvalid].getTag()=="kingP1"||posvalid == 22){
+                                        return 100
+                                    }
+                                    else if(papancopy[posvalid].getTag()=="armyP1"){
+                                        return 50
+                                    }
+                                    else {
+                                        return 0
+                                    }
+                                }
+                                // di bawah ini untuk ngeswipe posisi card dari dalam arraylist
+                                var tempnamecard = allcard[i]
+                                allcard[i] = allcard[4]
+                                allcard[4] = tempnamecard
+                                // di bawah ini untuk mengubah tag posisi pion baru dengan nama tag posisi sebelumnya
+                                papancopy[posvalid].setTag("$tagbefore")
+
+                                // menampung nilai return dari recursive
+                                var retVal = alphabeta(papancopy, allcard,depth-1,false,alpha,beta)
+
+                                if (v<retVal){// kondisi mendapatkan nilai max
+                                    v = retVal // nilai v diganti dengan nilai max
+                                    if(alpha<v){// jika alpha kurang dari nilai v (nilai alpha itu adalah min tak hingga)
+                                        if (depth == 3){// jika sudah di kedalaman 3 maka dibuat kordinat yang paling baik untuk dituju
+                                            posvalidAI = kordinatsekarang
+                                            cardAI = cardsekarang
+                                        }
+                                        if (beta<=v){
+                                            return v
+                                        }
+                                    }
+                                }
+                            }
+                            else{
+                                continue
+                            }
+                        } catch (e: Exception) {
+                            continue
+                        }
                     }
                 }
-
             }
-            else if (chosecard!=""&&(papan[ctridx].getTag().toString()=="valid"||papan[ctridx].getTag().toString()=="armyP1"||papan[ctridx].getTag().toString()=="kingP1")){// kondisi jika klik pada kotak yang sudah valid untuk melangkah
-                //untuk mengecek apakah langkah dari pion ini menuju pion yang akan dikalahkan
-                if (papan[ctridx].getTag().toString()=="armyP1"){
-                    jumpionP1--
+            return v
+        }
+        else{
+            //minimize untuk nilai p1
+            var v = Integer.MAX_VALUE
+            for (i in 0..1){// ini untuk ngeloop card
+                var idxlangkah = setupgame.getCard(allcard[i])
+                for(j in 0..papancopy.size-1){// untuk mengecek seluruh papancopy
+                    if (papancopy[j].getTag()=="empty"||papancopy[j].getTag()=="armyP2"||papancopy[j].getTag()=="kingP2"){// di sini jika ketemu kordinat yang tidak pasti langsung dicontinue
+                        continue
+                    }
+                    for(k in 0..idxlangkah.size-1){
+                        var posvalid = j
+                        var banding1 =
+                            Math.ceil((posvalid / 5).toDouble())//nilai pembulatan ke atas dari posisi valid sebelum ditambah kordinat langkah valid
+                        posvalid += (idxlangkah[k][0])//untuk menghitung kordinat x
+                        var banding2 =
+                            Math.ceil((posvalid / 5).toDouble())//nilai pembulatan ke atas dari posisi valid sesudah ditambah kordinat x langkah valid
+                        posvalid -= (5 * idxlangkah[k][1])// untuk menghitung kordinat y
+
+                        try {
+                            if (papancopy[posvalid].getTag() != "armyP1" && papancopy[posvalid].getTag() != "kingP1" && banding1 == banding2) {// melakukan pengecekan apakah langkah yang divalidasi merupakan tempat pin kelompok P1
+//                                    papancopy[posvalid].setBackgroundColor(resources.getColor(R.color.valid_papan))
+                                // harus membuat bentuk papancopy setelah pion dipindahkan dan dimasukkan ke dalam recursive
+                                var tagbefore = papancopy[j].getTag()
+                                papancopy[j].setTag("empty")
+                                if (depth<=0) {
+                                    if (papancopy[posvalid].getTag()=="kingP2"||posvalid == 2){
+                                        return -100
+                                    }
+                                    else if(papancopy[posvalid].getTag()=="armyP2"){
+                                        return -50
+                                    }
+                                    else {
+                                        return 0
+                                    }
+                                }
+                                // di bawah ini untuk ngeswipe posisi card dari dalam arraylist
+                                var tempnamecard = allcard[i]
+                                allcard[i] = allcard[4]
+                                allcard[4] = tempnamecard
+                                // di bawah ini untuk mengubah tag posisi pion baru dengan nama tag posisi sebelumnya
+                                papancopy[posvalid].setTag("$tagbefore")
+
+                                // menampung nilai return dari recursive
+                                var retVal = alphabeta(papancopy, allcard,depth-1,false,alpha,beta)
+
+                                if (v<retVal){// kondisi mendapatkan nilai max
+                                    v = retVal // nilai v diganti dengan nilai max
+                                    if(alpha<v){// jika alpha kurang dari nilai v (nilai alpha itu adalah min tak hingga)
+                                        if (v<=alpha){
+                                            return v
+                                        }
+                                    }
+                                }
+                            }
+                            else{
+                                continue
+                            }
+                        } catch (e: Exception) {
+                            continue
+                        }
+                    }
                 }
-                else if (papan[ctridx].getTag().toString()=="kingP1"){
-                    jumpionP1=0
-                }
-
-                papan[ctridx].setImageDrawable(resources.getDrawable(R.drawable.red_pawn))//merubah posisi pion pada kotak yang valid
-                papan[ctridx].setTag(papan[pionpick].getTag())//set tag posisi pion baru dengan tag yang sebelumnya di posisi lama
-
-                whiteAllboard()// memutihkan semua papan
-                papan[pionpick].setTag("empty")// mengubah tag posisi pion yang sebelumnya ke empty
-                papan[pionpick].setImageDrawable(resources.getDrawable(R.drawable.blank_background))// menghapus gambar pion pada posisi sebelumnya
-
-                changeTurn()
-
-                checkWin()
             }
-
+            return v
         }
     }
 
@@ -276,7 +579,19 @@ class TwoPlayer : AppCompatActivity() {
     fun whiteAllboard(){// function ini untuk memutihkan seluruh papan terlebih dahulu
         for (i in 0..papan.size-1){
             papan[i].setBackgroundColor(resources.getColor(R.color.white))
-            if (papan[i].getTag()!="armyP1"&&papan[i].getTag()!="kingP1"&&papan[i].getTag()!="armyP2"&&papan[i].getTag()!="kingP2"){
+            if (papan[i].getTag()=="armyP1v"){
+                papan[i].setTag("armyP1")
+            }
+            else if (papan[i].getTag()=="kingP1v"){
+                papan[i].setTag("kingP1")
+            }
+            else if (papan[i].getTag()=="armyP2v"){
+                papan[i].setTag("armyP2")
+            }
+            else if (papan[i].getTag()=="kingP2v"){
+                papan[i].setTag("kingP2")
+            }
+            else if (papan[i].getTag()=="valid"){
                 papan[i].setTag("empty")
             }
         }
@@ -309,6 +624,223 @@ class TwoPlayer : AppCompatActivity() {
         pionpick = -1
 
     }
+
+    fun changeTurnAI(){
+        if (turn == "P1"){// kondisi jika player 1 selesai bermain
+            turn = "AI"
+            cardNextP2.setText(chosecard)
+            allcard.set(5,chosecard.toString())
+            if (cardP1_1.text==chosecard){
+                cardP1_1.setText(cardNextP1.text)
+                allcard.set(0,cardNextP1.text.toString())
+            }
+            else{
+                cardP1_2.setText(cardNextP1.text)
+                allcard.set(1,cardNextP1.text.toString())
+            }
+            cardNextP1.setText("")
+
+        }
+//        else{// kondisi jika player AI selesai bermain
+//            turn = "P1"
+//            cardNextP1.setText(chosecard)
+//            allcard.set(5,chosecard.toString())
+//            if (cardP2_1.text==chosecard){
+//                cardP2_1.setText(cardNextP2.text)
+//                allcard.set(2,cardNextP2.text.toString())
+//            }
+//            else{
+//                cardP2_2.setText(cardNextP2.text)
+//                allcard.set(3,cardNextP2.text.toString())
+//            }
+//            cardNextP2.setText("")
+//        }
+        chosecard = ""
+        pionpick = -1
+
+    }
+
+//    fun alphabetaPruning(papan:ArrayList<ImageButton>,allcard:ArrayList<String>,depth:Int,isMaximizing:Boolean, jumpionP1:Int, jumpionP2: Int,alpha:Int,beta:Int) : ArrayList<ImageButton>{
+//        if (depth>maxDept){
+//            return papan
+//        }
+//        else{
+//            if (isMaximizing) {
+//                var ctr = 0// untuk mengcounter apakah pion yang dicari jalannya sudah semua pion atau belum
+//                for (i in 0..papan.size - 1) {
+//                    if (ctr>=jumpionP2){
+//                        break
+//                    }
+//                    var idxlangkah1 = setupgame.getCard(allcard[2])// mendapatkan array dari card yang diklik
+//                    var idxlangkah2 = setupgame.getCard(allcard[3])// mendapatkan array dari card yang diklik
+//                    if (papan[i].getTag()=="armyP2"||papan[i].getTag()=="kingP2"){
+//                        for(j in 0..idxlangkah1.size-1) {
+//                            var posvalid = i
+//                            var banding1 =
+//                                Math.ceil((posvalid / 5).toDouble())//nilai pembulatan ke atas dari posisi valid sebelum ditambah kordinat langkah valid
+//                            posvalid += (idxlangkah1[j][0])//untuk menghitung kordinat x
+//                            var banding2 =
+//                                Math.ceil((posvalid / 5).toDouble())//nilai pembulatan ke atas dari posisi valid sesudah ditambah kordinat x langkah valid
+//                            posvalid -= (5 * idxlangkah1[j][1])// untuk menghitung kordinat y
+//
+//                            try {
+//                                if (papan[posvalid].getTag() != "armyP1" && papan[posvalid].getTag() != "kingP1" && banding1 == banding2) {// melakukan pengecekan apakah langkah yang divalidasi merupakan tempat pin kelompok P1
+////                                    papan[posvalid].setBackgroundColor(resources.getColor(R.color.valid_papan))
+//                                    // harus membuat bentuk papan setelah pion dipindahkan dan dimasukkan ke dalam recursive
+//                                    var tagbefore = papan[i].getTag()
+//                                    papan[i].setTag("empty")
+//                                    if (papan[posvalid].getTag()=="kingP2"){
+//                                        var tempnamecard = allcard[2]
+//                                        allcard[2] = allcard[5]
+//                                        allcard[5] = tempnamecard
+//                                        return alphabetaPruning(papan,allcard,depth-1,false,0,jumpionP2,0,0)
+//                                    }
+//                                    else if(papan[posvalid].getTag()=="armyP2"){
+//                                        var tempnamecard = allcard[2]
+//                                        allcard[2] = allcard[5]
+//                                        allcard[5] = tempnamecard
+//                                        return alphabetaPruning(papan,allcard,depth-1,false,jumpionP1-1,jumpionP2,0,0)
+//                                    }
+//                                    papan[posvalid].setTag("$tagbefore")
+//
+//
+//                                    //di sini harusnya ada recursive
+//                                }
+//                            } catch (e: Exception) {
+//
+//                            }
+//                        }
+//                        for(j in 0..idxlangkah2.size-1) {
+//                            var posvalid = i
+//                            var banding1 =
+//                                Math.ceil((posvalid / 5).toDouble())//nilai pembulatan ke atas dari posisi valid sebelum ditambah kordinat langkah valid
+//                            posvalid += (idxlangkah2[j][0])//untuk menghitung kordinat x
+//                            var banding2 =
+//                                Math.ceil((posvalid / 5).toDouble())//nilai pembulatan ke atas dari posisi valid sesudah ditambah kordinat x langkah valid
+//                            posvalid -= (5 * idxlangkah2[j][1])// untuk menghitung kordinat y
+//
+//                            try {
+//                                if (papan[posvalid].getTag() != "armyP1" && papan[posvalid].getTag() != "kingP1" && banding1 == banding2) {// melakukan pengecekan apakah langkah yang divalidasi merupakan tempat pin kelompok P1
+////                                    papan[posvalid].setBackgroundColor(resources.getColor(R.color.valid_papan))
+//                                    // harus membuat bentuk papan setelah pion dipindahkan dan dimasukkan ke dalam recursive
+//                                    var tagbefore = papan[i].getTag()
+//                                    papan[i].setTag("empty")
+//                                    if (papan[posvalid].getTag()=="kingP2"){
+//                                        var tempnamecard = allcard[3]
+//                                        allcard[3] = allcard[5]
+//                                        allcard[5] = tempnamecard
+//                                        return alphabetaPruning(papan,allcard,depth-1,false,0,jumpionP2,0,0)
+//                                    }
+//                                    else if(papan[posvalid].getTag()=="armyP2"){
+//                                        var tempnamecard = allcard[3]
+//                                        allcard[3] = allcard[5]
+//                                        allcard[5] = tempnamecard
+//                                        return alphabetaPruning(papan,allcard,depth-1,false,jumpionP1-1,jumpionP2,0,0)
+//                                    }
+//                                    papan[posvalid].setTag("$tagbefore")
+//
+//
+//                                    //di sini harusnya ada recursive
+//                                }
+//                            } catch (e: Exception) {
+//
+//                            }
+//                        }
+//
+//                        ctr++
+//                    }
+//                }
+//                return alphabetaPruning(papan,allcard,depth-1,false,jumpionP1,jumpionP2,0,0)
+//            }
+//            else{
+//                var ctr = 0// untuk mengcounter apakah pion yang dicari jalannya sudah semua pion atau belum
+//                for (i in 0..papan.size - 1) {
+//                    if (ctr>=jumpionP1){
+//                        break
+//                    }
+//                    var idxlangkah1 = setupgame.getCard(allcard[0])// mendapatkan array dari card yang diklik
+//                    var idxlangkah2 = setupgame.getCard(allcard[1])// mendapatkan array dari card yang diklik
+//                    if (papan[i].getTag()=="armyP1"||papan[i].getTag()=="kingP1"){
+//                        for(j in 0..idxlangkah1.size-1) {
+//                            var posvalid = i
+//                            var banding1 =
+//                                Math.ceil((posvalid / 5).toDouble())//nilai pembulatan ke atas dari posisi valid sebelum ditambah kordinat langkah valid
+//                            posvalid += (idxlangkah1[j][0])//untuk menghitung kordinat x
+//                            var banding2 =
+//                                Math.ceil((posvalid / 5).toDouble())//nilai pembulatan ke atas dari posisi valid sesudah ditambah kordinat x langkah valid
+//                            posvalid -= (5 * idxlangkah1[j][1])// untuk menghitung kordinat y
+//
+//                            try {
+//                                if (papan[posvalid].getTag() != "armyP2" && papan[posvalid].getTag() != "kingP2" && banding1 == banding2) {// melakukan pengecekan apakah langkah yang divalidasi merupakan tempat pin kelompok P1
+////                                    papan[posvalid].setBackgroundColor(resources.getColor(R.color.valid_papan))
+//                                    // harus membuat bentuk papan setelah pion dipindahkan dan dimasukkan ke dalam recursive
+//                                    var tagbefore = papan[i].getTag()
+//                                    papan[i].setTag("empty")
+//                                    if (papan[posvalid].getTag()=="kingP1"){
+//                                        var tempnamecard = allcard[0]
+//                                        allcard[0] = allcard[5]
+//                                        allcard[5] = tempnamecard
+//                                        return alphabetaPruning(papan,allcard,depth-1,true,jumpionP1,0,0,0)
+//                                    }
+//                                    else if(papan[posvalid].getTag()=="armyP1"){
+//                                        var tempnamecard = allcard[0]
+//                                        allcard[0] = allcard[5]
+//                                        allcard[5] = tempnamecard
+//                                        return alphabetaPruning(papan,allcard,depth-1,true,jumpionP1,jumpionP2-1,0,0)
+//                                    }
+//                                    papan[posvalid].setTag("$tagbefore")
+//
+//
+//                                    //di sini harusnya ada recursive
+//                                }
+//                            } catch (e: Exception) {
+//
+//                            }
+//                        }
+//                        for(j in 0..idxlangkah2.size-1) {
+//                            var posvalid = i
+//                            var banding1 =
+//                                Math.ceil((posvalid / 5).toDouble())//nilai pembulatan ke atas dari posisi valid sebelum ditambah kordinat langkah valid
+//                            posvalid += (idxlangkah2[j][0])//untuk menghitung kordinat x
+//                            var banding2 =
+//                                Math.ceil((posvalid / 5).toDouble())//nilai pembulatan ke atas dari posisi valid sesudah ditambah kordinat x langkah valid
+//                            posvalid -= (5 * idxlangkah2[j][1])// untuk menghitung kordinat y
+//
+//                            try {
+//                                if (papan[posvalid].getTag() != "armyP2" && papan[posvalid].getTag() != "kingP2" && banding1 == banding2) {// melakukan pengecekan apakah langkah yang divalidasi merupakan tempat pin kelompok P1
+////                                    papan[posvalid].setBackgroundColor(resources.getColor(R.color.valid_papan))
+//                                    // harus membuat bentuk papan setelah pion dipindahkan dan dimasukkan ke dalam recursive
+//                                    var tagbefore = papan[i].getTag()
+//                                    papan[i].setTag("empty")
+//                                    if (papan[posvalid].getTag()=="kingP1"){
+//                                        var tempnamecard = allcard[1]
+//                                        allcard[1] = allcard[5]
+//                                        allcard[5] = tempnamecard
+//                                        return alphabetaPruning(papan,allcard,depth-1,true,jumpionP1,0,0,0)
+//                                    }
+//                                    else if(papan[posvalid].getTag()=="armyP1"){
+//                                        var tempnamecard = allcard[1]
+//                                        allcard[1] = allcard[5]
+//                                        allcard[5] = tempnamecard
+//                                        return alphabetaPruning(papan,allcard,depth-1,true,jumpionP1,jumpionP2-1,0,0)
+//                                    }
+//                                    papan[posvalid].setTag("$tagbefore")
+//
+//
+//                                    //di sini harusnya ada recursive
+//                                }
+//                            } catch (e: Exception) {
+//
+//                            }
+//                        }
+//
+//                        ctr++
+//                    }
+//                }
+//                return alphabetaPruning(papan,allcard,depth-1,true,jumpionP1,jumpionP2,0,0)
+//            }
+//        }
+//    }
 
     fun checkWin(){
         if (jumpionP1<=0){
