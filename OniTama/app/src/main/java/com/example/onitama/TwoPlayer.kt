@@ -504,6 +504,7 @@ class TwoPlayer : AppCompatActivity() {
                                 // di bawah ini untuk mengubah tag posisi pion baru dengan nama tag posisi sebelumnya
                                 papancopy[posvalid]="$tagbefore"
 
+
                                 // menampung nilai return dari recursive
                                 var retVal = alphabeta(papancopy, allcard,depth-1,false,alpha,beta)
 
