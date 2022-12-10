@@ -8,4 +8,5 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="valid_papan">#A7FF59</color>
+    <color name="btndefault">#9E804A</color>
 </resources>
